@@ -22,9 +22,15 @@ func NewAuthTarantool(db *pkg_conn.Tarantool) AuthDBStore {
 func (db *AuthTarantool) SaveUserSession(ctx context.Context, data models.LoginInfo) error {
 	const cp = "save_session"
 
-	_, err := db.conn.Call(cp, []interface{}{ctx, data.UserID, data.SessionID, data.Token, data.UserAgent, data.IpAddress})
+	resp, err := db.conn.Call(cp, []interface{}{ctx, data.UserID, data.SessionID, data.Token, data.UserAgent, data.IpAddress})
 	if err != nil {
-		return fmt.Errorf("SaveUserSession err: %v", err)
+		return fmt.Errorf("SaveUserSession err: %v, resp.Error", err)
+	}
+	if resp == nil {
+		return fmt.Errorf("SaveUserSession resp is nil")
+	}
+	if resp.Code != 204 {
+		return fmt.Errorf("SaveUserSession - resp.Code not 204 err: %v", resp)
 	}
 
 	return nil
