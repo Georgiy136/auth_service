@@ -20,7 +20,7 @@ services:
       - "3301:3301"  # Порт Tarantool
     volumes:
       - tarantool_data:/data  # Место для хранения данных
-    command: tarantool /data/init.lua  # Запуск Tarantool с вашим скриптом инициализации
+    command: tarantool /init_tarantool_db/init.lua  # Запуск Tarantool с вашим скриптом инициализации
 
   auth_service:
     build: ./
