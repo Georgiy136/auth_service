@@ -1,11 +1,10 @@
-package postgres
+package repo
 
 import (
 	"context"
 	"fmt"
 	"github.com/Georgiy136/auth_service/internal/models"
 	"github.com/Georgiy136/auth_service/internal/service/app_errors"
-	"github.com/Georgiy136/auth_service/internal/service/repo"
 	"github.com/Georgiy136/auth_service/pkg/postgres"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -15,7 +14,7 @@ type AuthRepo struct {
 	Dbpool *pgxpool.Pool
 }
 
-func NewAuthRepo(pg *postgres.Postgres) repo.AuthDBStore {
+func NewAuthRepo(pg *postgres.Postgres) AuthDBStore {
 	return &AuthRepo{
 		Dbpool: pg.Dbpool,
 	}

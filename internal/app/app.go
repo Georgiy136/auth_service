@@ -7,7 +7,7 @@ import (
 	"github.com/Georgiy136/auth_service/internal/http"
 	"github.com/Georgiy136/auth_service/internal/service"
 	"github.com/Georgiy136/auth_service/internal/service/crypter"
-	db "github.com/Georgiy136/auth_service/internal/service/repo/postgres"
+	db "github.com/Georgiy136/auth_service/internal/service/repo"
 	"github.com/Georgiy136/auth_service/internal/service/token_generate"
 	"github.com/Georgiy136/auth_service/internal/service/token_generate/jwt"
 	"github.com/Georgiy136/auth_service/internal/service/token_generate/tokens"

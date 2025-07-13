@@ -9,13 +9,14 @@ import (
 
 type (
 	Config struct {
-		Http               `yaml:"http"`
-		Postgres           `yaml:"postgres"`
-		NotificationClient `yaml:"notification_client"`
+		Http     `yaml:"http"`
+		Postgres `yaml:"postgres"`
 		Tokens
-		AccessToken  `yaml:"accesstoken"`
-		RefreshToken `yaml:"refreshtoken"`
-		Crypter      `yaml:"crypter"`
+		AccessToken        `yaml:"accesstoken"`
+		RefreshToken       `yaml:"refreshtoken"`
+		Crypter            `yaml:"crypter"`
+		Tarantool          `yaml:"tarantool"`
+		NotificationClient `yaml:"notification_client"`
 	}
 
 	Http struct {
@@ -45,11 +46,17 @@ type (
 	Tokens struct {
 		AccessToken
 		RefreshToken
-		Crypter
 	}
 
 	NotificationClient struct {
 		Url string
+	}
+
+	Tarantool struct {
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
 	}
 )
 
@@ -80,9 +87,6 @@ func NewConfig() (*Config, error) {
 		RefreshToken: RefreshToken{
 			SignedKey:     "abcdabcd",
 			TokenLifetime: 1 * time.Hour,
-		},
-		Crypter: Crypter{
-			SignedKey: "abcdabcdabcdabcd",
 		},
 	}
 	cfg.Crypter = Crypter{

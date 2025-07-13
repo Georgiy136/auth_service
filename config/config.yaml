@@ -8,3 +8,9 @@ postgres:
  password: "4650"
  dbname: "postgres"
  sslmode: "disable"
+
+tarantool:
+ host: "localhost" #localhost tarantool
+ port: 3301
+ user: "user"
+ password: "pass"

@@ -14,11 +14,22 @@ services:
       POSTGRES_PASSWORD: 4650
       POSTGRES_DB: default
 
+  tarantool:
+    image: tarantool/tarantool:latest
+    container_name: tarantool
+    ports:
+      - "3301:3301"  # Порт Tarantool
+    volumes:
+      - tarantool_data:/data  # Место для хранения данных
+    command: tarantool /data/init.lua  # Запуск Tarantool с вашим скриптом инициализации
+
   auth_service:
     build: ./
     depends_on:
       - postgres
+      - tarantool
     ports:
       - 8080:8080
 volumes:
   dbdata:
+  tarantool_data:
