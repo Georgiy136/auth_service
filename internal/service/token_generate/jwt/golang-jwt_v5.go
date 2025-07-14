@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	"errors"
 	"fmt"
+	"github.com/go-faster/errors"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -41,7 +41,7 @@ func (j *JwtTokenGenerateGolangJwtV5) ParseToken(token, signedKey string) (strin
 			}
 			return sub, err
 		default:
-			return "", fmt.Errorf("jwt.Parse error: %w", err)
+			return "", fmt.Errorf("jwt.ParseToken error: %w", err)
 		}
 	}
 
@@ -49,7 +49,7 @@ func (j *JwtTokenGenerateGolangJwtV5) ParseToken(token, signedKey string) (strin
 		return j.getTokenSubject(parsedToken)
 	}
 
-	return "", errors.New("token_generate is not valid error")
+	return "", errors.New("jwt token is not valid error")
 }
 
 func (j *JwtTokenGenerateGolangJwtV5) getTokenSubject(token *jwt.Token) (string, error) {

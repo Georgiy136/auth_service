@@ -105,18 +105,13 @@ func (us *AuthService) UpdateTokens(ctx context.Context, data models.DataFromReq
 
 	// сверяем refresh токены
 	if !strings.EqualFold(accessTokenInfo.RefreshToken, refreshTokenDecoded) {
-		return nil, app_errors.TokenNotValidError
+		return nil, app_errors.RefreshTokenNotValidError
 	}
 
 	// ищем инфо о входе в БД по user_id и session_id
 	loginInfo, err := us.db.GetUserSession(ctx, accessTokenInfo.UserID, accessTokenInfo.SessionID)
 	if err != nil {
-		switch {
-		case errors.Is(err, app_errors.SessionUserNotFoundError):
-			return nil, app_errors.SessionUserNotFoundError
-		default:
-			return nil, errors.Wrap(err, "UpdateTokens - us.db.GetUserSession error")
-		}
+		return nil, errors.Wrap(err, "UpdateTokens - us.db.GetUserSession error")
 	}
 
 	// Сверяем совпадают ли refresh токен с хешированным в БД
@@ -168,23 +163,13 @@ func (us *AuthService) GetUser(ctx context.Context, data models.DataFromRequestG
 
 	accessTokenInfo, err := us.issueTokensService.AccessToken.Parse(accessTokenDecoded)
 	if err != nil {
-		switch {
-		case errors.Is(err, app_errors.TokenIsExpiredError):
-			return nil, app_errors.TokenIsExpiredError
-		default:
-			return nil, errors.Wrap(err, "AccessToken Parse error")
-		}
+		return nil, errors.Wrap(err, "AccessToken Parse error")
 	}
 
 	// проверяем инфо о входе в БД по user_id и session_id
 	loginInfo, err := us.db.GetUserSession(ctx, accessTokenInfo.UserID, accessTokenInfo.SessionID)
 	if err != nil {
-		switch {
-		case errors.Is(err, app_errors.SessionUserNotFoundError):
-			return nil, app_errors.SessionUserNotFoundError
-		default:
-			return nil, errors.Wrap(err, "UpdateTokens - us.db.GetUserSession error")
-		}
+		return nil, errors.Wrap(err, "UpdateTokens - us.db.GetUserSession error")
 	}
 
 	return &models.User{UserID: loginInfo.UserID}, nil
@@ -206,12 +191,7 @@ func (us *AuthService) Logout(ctx context.Context, data models.DataFromRequestLo
 	// проверяем инфо о входе в БД по user_id и session_id
 	loginInfo, err := us.db.GetUserSession(ctx, accessTokenInfo.UserID, accessTokenInfo.SessionID)
 	if err != nil {
-		switch {
-		case errors.Is(err, app_errors.SessionUserNotFoundError):
-			return app_errors.SessionUserNotFoundError
-		default:
-			return errors.Wrap(err, "Logout - us.db.GetUserSession error")
-		}
+		return errors.Wrap(err, "Logout - us.db.GetUserSession error")
 	}
 
 	// удаляем старую сессию в БД

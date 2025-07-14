@@ -44,8 +44,9 @@ func (a *accessToken) Parse(accessToken string) (*models.AccessTokenPayload, err
 				return payload, fmt.Errorf("ParseToken - a.getAccessTokenPayload error: %w", err)
 			}
 			return payload, err
+		default:
+			return nil, app_errors.ParseJwtTokenError
 		}
-		return nil, errors.Wrap(err, "ParseToken error")
 	}
 
 	payload, err := a.getAccessTokenPayload(payloadString)

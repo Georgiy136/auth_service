@@ -57,10 +57,13 @@ func (h *AuthHandler) UpdateTokens(c *gin.Context) {
 		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
+		case errors.Is(err, app_errors.ParseJwtTokenError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
 		case errors.Is(err, app_errors.UserAgentNotMatchError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
-		case errors.Is(err, app_errors.TokenNotValidError):
+		case errors.Is(err, app_errors.RefreshTokenNotValidError):
 			httpresponse.SendFailBadRequest(c, err.Error(), nil)
 		case errors.Is(err, app_errors.SessionUserNotFoundError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
@@ -90,6 +93,9 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
+		case errors.Is(err, app_errors.ParseJwtTokenError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
 		case errors.Is(err, app_errors.TokenIsExpiredError):
@@ -124,6 +130,9 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
+		case errors.Is(err, app_errors.ParseJwtTokenError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
 		case errors.Is(err, app_errors.UserAgentNotMatchError):
