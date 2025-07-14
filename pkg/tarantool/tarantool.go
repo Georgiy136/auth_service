@@ -1,5 +1,6 @@
 package tarantool
 
+/*
 import (
 	"fmt"
 	"github.com/Georgiy136/auth_service/config"
@@ -22,4 +23,4 @@ func NewTarantool(cfg config.Tarantool) (*Tarantool, error) {
 	return &Tarantool{
 		Conn: conn,
 	}, nil
-}
+}*/

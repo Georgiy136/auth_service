@@ -1,5 +1,6 @@
 package repo
 
+/*
 import (
 	"context"
 	"fmt"
@@ -62,3 +63,4 @@ func (db *AuthTarantool) DeleteUserSession(ctx context.Context, userID int, sess
 
 	return nil
 }
+*/
