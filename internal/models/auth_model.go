@@ -6,8 +6,9 @@ type AuthTokens struct {
 }
 
 type AccessTokenPayload struct {
-	UserID    int    `json:"user_id"`
-	SessionID string `json:"session_id"`
+	UserID       int    `json:"user_id"`
+	RefreshToken string `json:"refresh_token"`
+	SessionID    string `json:"session_id"`
 }
 
 type DataFromRequestGetTokens struct {
@@ -24,8 +25,7 @@ type DataFromRequestUpdateTokens struct {
 }
 
 type DataFromRequestGetUser struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken string `json:"access_token"`
 }
 
 type DataFromRequestLogout struct {

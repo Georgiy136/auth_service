@@ -71,8 +71,7 @@ func (h *AuthHandler) UpdateTokens(c *gin.Context) {
 
 func (h *AuthHandler) GetUser(c *gin.Context) {
 	type getUserRequest struct {
-		AccessToken  string `json:"access_token" binding:"required"`
-		RefreshToken string `json:"refresh_token" binding:"required"`
+		AccessToken string `json:"access_token" binding:"required"`
 	}
 	var body getUserRequest
 	if err := c.BindJSON(&body); err != nil {
@@ -81,8 +80,7 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 	}
 
 	user, err := h.us.GetUser(c.Request.Context(), models.DataFromRequestGetUser{
-		AccessToken:  body.AccessToken,
-		RefreshToken: body.RefreshToken,
+		AccessToken: body.AccessToken,
 	})
 	if err != nil {
 		switch {

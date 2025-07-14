@@ -46,9 +46,10 @@ func (us *AuthService) GetTokens(ctx context.Context, data models.DataFromReques
 	if err != nil {
 		return nil, errors.Wrap(err, "RefreshToken.New error")
 	}
-	accessToken, err := us.issueTokensService.AccessToken.New(refreshToken, models.AccessTokenPayload{
-		UserID:    data.UserID,
-		SessionID: sessionID,
+	accessToken, err := us.issueTokensService.AccessToken.New(models.AccessTokenPayload{
+		UserID:       data.UserID,
+		RefreshToken: refreshToken,
+		SessionID:    sessionID,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "AccessToken.New error")
@@ -158,28 +159,12 @@ func (us *AuthService) UpdateTokens(ctx context.Context, data models.DataFromReq
 }
 
 func (us *AuthService) GetUser(ctx context.Context, data models.DataFromRequestGetUser) (*models.User, error) {
-	refreshTokenDecoded, err := us.crypter.DecodeFromBase64AndDecrypt(data.RefreshToken)
-	if err != nil {
-		return nil, errors.Wrap(err, "UpdateTokens - DecodeFromBase64AndDecrypt refreshToken error")
-	}
 	accessTokenDecoded, err := us.crypter.DecodeFromBase64AndDecrypt(data.AccessToken)
 	if err != nil {
 		return nil, errors.Wrap(err, "UpdateTokens - DecodeFromBase64AndDecrypt accessToken error")
 	}
 
-	if err = us.issueTokensService.RefreshToken.Parse(refreshTokenDecoded); err != nil {
-		switch {
-		case errors.Is(err, app_errors.TokenIsExpiredError):
-			return nil, app_errors.TokenIsExpiredError
-		default:
-			return nil, errors.Wrap(err, "RefreshToken Parse error")
-		}
-	}
-
-	accessTokenInfo, err := us.issueTokensService.AccessToken.Parse(models.AuthTokens{
-		AccessToken:  accessTokenDecoded,
-		RefreshToken: refreshTokenDecoded,
-	})
+	accessTokenInfo, err := us.issueTokensService.AccessToken.Parse(accessTokenDecoded)
 	if err != nil {
 		switch {
 		case errors.Is(err, app_errors.TokenIsExpiredError):
@@ -199,12 +184,8 @@ func (us *AuthService) GetUser(ctx context.Context, data models.DataFromRequestG
 			return nil, errors.Wrap(err, "UpdateTokens - us.db.GetUserSession error")
 		}
 	}
-	// Сверяем совпадают ли refresh токен с хешированным в БД
-	if !strings.EqualFold(helpers.HashSha256(data.RefreshToken), loginInfo.Token) {
-		return nil, errors.Wrap(err, "UpdateTokens - RefreshToken does not match in db")
-	}
 
-	return &models.User{UserID: accessTokenInfo.UserID}, nil
+	return &models.User{UserID: loginInfo.UserID}, nil
 }
 
 func (us *AuthService) Logout(ctx context.Context, data models.DataFromRequestLogout) error {

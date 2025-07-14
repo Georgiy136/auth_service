@@ -25,20 +25,20 @@ func NewAccessToken(jwtToken jwt.JwtTokenGenerate, crypter *crypter.Crypter, cfg
 	}
 }
 
-func (a *accessToken) New(refreshToken string, accessTokenPayload models.AccessTokenPayload) (string, error) {
+func (a *accessToken) New(accessTokenPayload models.AccessTokenPayload) (string, error) {
 	payloadString, err := a.genAccessTokenPayload(accessTokenPayload)
 	if err != nil {
 		return "", fmt.Errorf("genAccessTokenPayload error: %w", err)
 	}
 
-	return a.jwtToken.GenerateToken(a.getSignedString(refreshToken), a.cfg.TokenLifetime, payloadString)
+	return a.jwtToken.GenerateToken(a.cfg.SignedKey, a.cfg.TokenLifetime, payloadString)
 }
 
-func (a *accessToken) Parse(tokens models.AuthTokens) (*models.AccessTokenPayload, error) {
-	payloadString, err := a.jwtToken.ParseToken(tokens.AccessToken, a.getSignedString(tokens.RefreshToken))
+func (a *accessToken) Parse(accessToken string) (*models.AccessTokenPayload, error) {
+	payloadString, err := a.jwtToken.ParseToken(accessToken, a.cfg.SignedKey)
 	if err != nil {
 		switch {
-		case errors.Is(err, app_errors.TokenIsExpiredError):
+		case errors.Is(err, app_errors.TokenIsExpiredError): // срок действия истёк, возвращаем payload и ошибку
 			payload, err := a.getAccessTokenPayload(payloadString)
 			if err != nil {
 				return payload, fmt.Errorf("ParseToken - a.getAccessTokenPayload error: %w", err)
@@ -53,10 +53,6 @@ func (a *accessToken) Parse(tokens models.AuthTokens) (*models.AccessTokenPayloa
 		return nil, fmt.Errorf("ParseToken - a.getAccessTokenPayload error: %w", err)
 	}
 	return payload, nil
-}
-
-func (a *accessToken) getSignedString(refreshToken string) string {
-	return refreshToken + a.cfg.SignedKey
 }
 
 func (a *accessToken) genAccessTokenPayload(accessTokenPayload models.AccessTokenPayload) (string, error) {
