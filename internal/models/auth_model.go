@@ -29,9 +29,8 @@ type DataFromRequestGetUser struct {
 }
 
 type DataFromRequestLogout struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	UserAgent    string `json:"user_agent"`
+	AccessToken string `json:"access_token"`
+	UserAgent   string `json:"user_agent"`
 }
 
 type LoginInfo struct {

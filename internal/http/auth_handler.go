@@ -54,9 +54,14 @@ func (h *AuthHandler) UpdateTokens(c *gin.Context) {
 	})
 	if err != nil {
 		switch {
-		case errors.Is(err, app_errors.UserAgentNotMatchInDB):
+		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
+		case errors.Is(err, app_errors.UserAgentNotMatchError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
+		case errors.Is(err, app_errors.TokenNotValidError):
+			httpresponse.SendFailBadRequest(c, err.Error(), nil)
 		case errors.Is(err, app_errors.SessionUserNotFoundError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
@@ -84,6 +89,9 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 	})
 	if err != nil {
 		switch {
+		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
 		case errors.Is(err, app_errors.TokenIsExpiredError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
@@ -101,8 +109,7 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 
 func (h *AuthHandler) Logout(c *gin.Context) {
 	type logoutRequest struct {
-		AccessToken  string `json:"access_token" binding:"required"`
-		RefreshToken string `json:"refresh_token" binding:"required"`
+		AccessToken string `json:"access_token" binding:"required"`
 	}
 	var body logoutRequest
 	if err := c.BindJSON(&body); err != nil {
@@ -111,13 +118,15 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	err := h.us.Logout(c.Request.Context(), models.DataFromRequestLogout{
-		AccessToken:  body.AccessToken,
-		RefreshToken: body.RefreshToken,
-		UserAgent:    c.Request.UserAgent(),
+		AccessToken: body.AccessToken,
+		UserAgent:   c.Request.UserAgent(),
 	})
 	if err != nil {
 		switch {
-		case errors.Is(err, app_errors.UserAgentNotMatchInDB):
+		case errors.Is(err, app_errors.DecodeAndDecryptTokenError):
+			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
+			return
+		case errors.Is(err, app_errors.UserAgentNotMatchError):
 			httpresponse.SendFailUnauthorized(c, err.Error(), nil)
 			return
 		case errors.Is(err, app_errors.SessionUserNotFoundError):
