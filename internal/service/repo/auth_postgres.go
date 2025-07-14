@@ -11,22 +11,16 @@ import (
 )
 
 type AuthRepo struct {
-	Dbpool *pgxpool.Pool
+	conn *pgxpool.Pool
 }
 
 func NewAuthRepo(pg *postgres.Postgres) AuthDBStore {
 	return &AuthRepo{
-		Dbpool: pg.Dbpool,
+		conn: pg.Dbpool,
 	}
 }
 
 func (db *AuthRepo) SaveUserSession(ctx context.Context, data models.LoginInfo) error {
-	conn, err := db.Dbpool.Acquire(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to acquire connection: %v", err)
-	}
-	defer conn.Release()
-
 	query := `INSERT INTO sessions.user_login (user_id, 
                                  			   session_id,
                                  			   hash_token,
@@ -35,19 +29,13 @@ func (db *AuthRepo) SaveUserSession(ctx context.Context, data models.LoginInfo) 
                                  			   ) 
 				values ($1, $2, $3, $4, $5);`
 
-	if _, err = conn.Query(ctx, query, data.UserID, data.SessionID, data.Token, data.UserAgent, data.IpAddress); err != nil {
+	if _, err := db.conn.Query(ctx, query, data.UserID, data.SessionID, data.Token, data.UserAgent, data.IpAddress); err != nil {
 		return fmt.Errorf("SaveUserSession err: %v", err)
 	}
 	return nil
 }
 
 func (db *AuthRepo) GetUserSession(ctx context.Context, userID int, sessionID string) (*models.LoginInfo, error) {
-	conn, err := db.Dbpool.Acquire(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to acquire connection: %v", err)
-	}
-	defer conn.Release()
-
 	query := `SELECT user_id,
                      session_id,
                      hash_token,
@@ -57,7 +45,7 @@ func (db *AuthRepo) GetUserSession(ctx context.Context, userID int, sessionID st
 			  WHERE user_id = $1 AND session_id = $2;`
 
 	var result models.LoginInfo
-	err = conn.QueryRow(ctx, query, userID, sessionID).Scan(&result.UserID, &result.SessionID, &result.Token, &result.UserAgent, &result.IpAddress)
+	err := db.conn.QueryRow(ctx, query, userID, sessionID).Scan(&result.UserID, &result.SessionID, &result.Token, &result.UserAgent, &result.IpAddress)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, app_errors.SessionUserNotFoundError
@@ -68,15 +56,9 @@ func (db *AuthRepo) GetUserSession(ctx context.Context, userID int, sessionID st
 }
 
 func (db *AuthRepo) DeleteUserSession(ctx context.Context, userID int, sessionID string) error {
-	conn, err := db.Dbpool.Acquire(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to acquire connection: %v", err)
-	}
-	defer conn.Release()
-
 	query := `DELETE FROM FROM sessions.user_login WHERE user_id = $1 AND session_id = $2;`
 
-	if _, err = conn.Query(ctx, query, userID, sessionID); err != nil {
+	if _, err := db.conn.Query(ctx, query, userID, sessionID); err != nil {
 		return fmt.Errorf("DeleteUserSession err: %v", err)
 	}
 	return nil
