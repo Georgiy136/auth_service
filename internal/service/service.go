@@ -104,7 +104,7 @@ func (us *AuthService) UpdateTokens(ctx context.Context, data models.DataFromReq
 	}
 
 	// сверяем refresh токены
-	if strings.EqualFold(accessTokenInfo.RefreshToken, refreshTokenDecoded) {
+	if !strings.EqualFold(accessTokenInfo.RefreshToken, refreshTokenDecoded) {
 		return nil, app_errors.TokenNotValidError
 	}
 
