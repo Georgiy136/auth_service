@@ -14,3 +14,9 @@ tarantool:
  port: 3301
  user: "user"
  password: "pass"
+
+redis:
+ host: "localhost" #localhost redis
+ port: 6379
+ user: "user"
+ password: "pass"

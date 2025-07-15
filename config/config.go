@@ -17,6 +17,7 @@ type (
 		Crypter            `yaml:"crypter"`
 		Tarantool          `yaml:"tarantool"`
 		NotificationClient `yaml:"notification_client"`
+		Redis              `yaml:"redis"`
 	}
 
 	Http struct {
@@ -53,6 +54,13 @@ type (
 	}
 
 	Tarantool struct {
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+	}
+
+	Redis struct {
 		Host     string `yaml:"host"`
 		Port     int    `yaml:"port"`
 		User     string `yaml:"user"`
