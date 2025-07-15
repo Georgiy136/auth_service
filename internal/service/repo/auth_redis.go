@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"github.com/Georgiy136/auth_service/internal/constant"
 	"github.com/Georgiy136/auth_service/internal/models"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/redis/go-redis/v9"
@@ -26,7 +27,7 @@ func (db *AuthRedis) SaveUserSession(ctx context.Context, data models.LoginInfo)
 		return fmt.Errorf("SaveUserSession - jsoniter.MarshalToString: %w", err)
 	}
 
-	if err = db.Rdb.Set(ctx, fmt.Sprintf(key, data.UserID, data.SessionID), dataString, redis.KeepTTL).Err(); err != nil {
+	if err = db.Rdb.Set(ctx, fmt.Sprintf(key, data.UserID, data.SessionID), dataString, constant.MaxRefreshTokenTTL).Err(); err != nil {
 		return fmt.Errorf("SaveUserSession err: %v", err)
 	}
 	return nil
